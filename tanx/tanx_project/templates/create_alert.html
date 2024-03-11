@@ -1,0 +1,117 @@
+{% load static %}
+
+<!--<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Alert</title>
+</head>
+<body>
+    <h2>Create Alert</h2>
+    <form method="post" action="/alerts/create/">
+        {% csrf_token %}
+        <label for="cryptocurrency">Cryptocurrency:</label><br>
+        <select id="cryptocurrency" name="cryptocurrency">
+            <option value="BTC">Bitcoin (BTC)</option>
+            <option value="ETH">Ethereum (ETH)</option>
+                    </select><br><br>
+        <label for="target_price">Target Price:</label><br>
+        <input type="number" id="target_price" name="target_price" step="0.01" min="0" required><br><br>
+        <button type="submit">Create Alert</button>
+    </form>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Alert</title>
+</head>
+<body>
+    <h2>Create Alert</h2>
+    
+    <div id="priceUpdate">
+        <div style="display:flex;">
+        <h4>Current Bitcoin Price:&nbsp;&nbsp;   </h4> 
+        <h2 id="currentPrice">Loading...</h2>
+        <p> &nbsp;&nbsp;Updated on => &nbsp;&nbsp;</p>
+        <p id="updatedAt">Loading..</p>
+        </div>
+        <p id="direction"></p>
+        
+    </div>
+
+    <script>
+        // Function to fetch Bitcoin price from API
+        function fetchBitcoinPrice() {
+            fetch('https://api.coindesk.com/v1/bpi/currentprice.json')
+                .then(response => response.json())
+                .then(data => {
+                    const bitcoinPrice = data.bpi.USD.rate;
+                    const updateAt = data.time.updated;
+                    document.getElementById('currentPrice').textContent = `USD ${bitcoinPrice}`;
+                    document.getElementById('updatedAt').textContent = `${updateAt}`;
+
+                    const bitcoinPriceFloat = data.bpi.USD.rate_float;
+                    target_price = document.getElementById('target_price')
+                    if (target_price.value == ''){
+                        document.getElementById('target_price').value = `${bitcoinPriceFloat}`;
+                    }
+                    // Check if price has changed and update direction indicator
+                    if (lastPrice !== -1) {
+                        const direction = bitcoinPriceFloat > lastPrice ? 'up' : 'down';
+                        const change = Math.abs(bitcoinPriceFloat - lastPrice).toFixed(4);
+                        //console.log(bitcoinPrice);
+                        //console.log(lastPrice);
+                        if (change > 0.0){
+                            directionElement = document.getElementById('direction');
+                        directionElement.textContent = `Price ${direction} by ${change}`;
+                        if(direction == 'up'){
+                            directionElement.style.color = 'green';
+                        } else {
+                            directionElement.style.color = 'red';
+                        }
+                        }
+                        
+                    }
+                    lastPrice = bitcoinPriceFloat;
+
+                })
+                .catch(error => {
+                    console.error('Error fetching Bitcoin price:', error);
+                });
+        }
+
+        // Fetch Bitcoin price initially
+        fetchBitcoinPrice();
+
+        // Fetch Bitcoin price every 2 seconds (adjust as needed)
+        setInterval(fetchBitcoinPrice, 1000);
+        window.onload = function() {
+            lastPrice = -1;
+          
+        };
+    </script>
+
+    
+    <form method="post" action="/tanx/alerts/create/" id="alertForm">
+        {% csrf_token %}
+        <label for="cryptocurrency">Cryptocurrency:</label><br>
+        <select id="cryptocurrency" name="cryptocurrency">
+            <option value="BTC">Bitcoin (BTC)</option>
+            <option value="ETH">Ethereum (ETH)</option>
+            <!-- Add more options as needed -->
+        </select><br><br>
+        <label for="target_price">Target Price:</label><br>
+        <input type="number" id="target_price" name="target_price" step="0.0001" min="0" required style="font-size:larger"><br><br>
+        <select id="direction" name="direction">
+            <option value="1">Price goes Up than Target Price</option>
+            <option value="2">Price goes Down than Target Price</option>
+        </select><br><br>
+        <button type="submit">Create Alert</button>
+    </form>
+</body>
+</html>

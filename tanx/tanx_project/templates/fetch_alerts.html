@@ -1,0 +1,207 @@
+{% load static %}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Price Alerts</title>
+    <style>
+        /* Add your CSS styles here */
+        .alert-container {
+            margin: 20px;
+        }
+        .alert {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .pagination {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            justify-content: center;
+        }
+        .page-link {
+            padding: 5px 10px;
+            margin: 0 5px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }
+        .page-link.active {
+            background-color: #007bff;
+            color: #fff;
+            border-color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="alert-container" id="alertContainer">
+        <!-- Price alerts will be displayed here -->
+    </div>
+
+    <ul class="pagination" id="paginationContainer">
+        <!-- Pagination links will be displayed here -->
+    </ul>
+
+    <script>
+        /*componentWillMount() {
+          console.log("will mount");
+          fetch('http://127.0.0.1:8000/tanx/alerts/fetch/', {
+            method: 'GET',
+          })
+          .then((response) => response.json())
+          .then((responseJson) => {
+            var priceAlerts = this.responseText;
+                    console.log(this.responseText);
+                    displayPriceAlerts(1, 5);
+                    generatePaginationLinks(totalPages, 1);
+                    return this.responseText;
+          })
+        }*/
+        var priceAlerts = undefined
+        window.onload = function() {
+          fetch('http://127.0.0.1:8000/tanx/alerts/fetch/', {
+            method: 'GET',
+          })
+          .then((response) => response.json())
+          .then((responseJson) => {
+            var priceAlerts = responseJson;
+            var currentPage = 1;
+            console.log(responseJson);
+            alertsToShow = responseJson;
+            var alertContainer = document.getElementById('alertContainer');
+            alertContainer.innerHTML = '';
+
+            alertsToShow.forEach(function(alert) {
+                var alertElement = document.createElement('div');
+                alertElement.classList.add('alert');
+                alertElement.innerHTML = `
+                    <strong>ID:</strong> ${alert.pk}<br>
+                    <strong>Cryptocurrency:</strong> ${alert.fields.cryptocurrency}<br>
+                    <strong>Target Price:</strong> ${alert.fields.target_price}
+                `;
+                alertContainer.appendChild(alertElement);
+            });
+
+            var paginationContainer = document.getElementById('paginationContainer');
+            paginationContainer.innerHTML = '';
+            totalPages = Object.keys(responseJson).length;
+            for (var i = 1; i <= totalPages; i++) {
+                var pageLink = document.createElement('li');
+                pageLink.classList.add('page-link');
+                if (i === currentPage) {
+                    pageLink.classList.add('active');
+                }
+                pageLink.textContent = i;
+                pageLink.setAttribute('data-page', i);
+                paginationContainer.appendChild(pageLink);
+
+                pageLink.addEventListener('click', function() {
+                    var pageNumber = parseInt(this.getAttribute('data-page'));
+                    console.log(pageNumber);
+                });
+            }
+
+
+                    
+                    //displayPriceAlerts(1, 5);
+                    //generatePaginationLinks(totalPages, 1);
+                    //return this.responseText;
+          })
+        };
+
+        function run() {
+ 
+            // Creating Our XMLHttpRequest object 
+            let xhr = new XMLHttpRequest();
+         
+            // Making our connection  
+            let url = 'http://127.0.0.1:8000/tanx/alerts/fetch/';
+            xhr.open("GET", url, true);
+         
+            // function execute after request is successful 
+            xhr.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+
+                    this.priceAlerts = this.responseText;
+                    //console.log(this.responseText);
+                    /*if (this.priceAlerts !== undefined){
+                        displayPriceAlerts(1, 5);
+                        generatePaginationLinks(totalPages, 1);
+                    }*/
+                    
+                    //return this.responseText;
+
+                }
+            }
+            // Sending our request 
+            xhr.send();
+        }
+        
+        // Mock data for price alerts (replace with actual data)
+        //var priceAlerts = [];
+        /*    { id: 1, cryptocurrency: 'BTC', targetPrice: 35000 },
+            { id: 2, cryptocurrency: 'ETH', targetPrice: 2000 },
+            { id: 3, cryptocurrency: 'ADA', targetPrice: 1 },
+            // Add more alerts as needed
+        ];*/
+
+        // Function to display price alerts
+        function displayPriceAlerts(pageNumber, pageSize) {
+            var startIndex = (pageNumber - 1) * pageSize;
+            var endIndex = startIndex + pageSize;
+            var priceAlerts = run();
+            var alertsToShow = priceAlerts.slice(startIndex, endIndex);
+
+            var alertContainer = document.getElementById('alertContainer');
+            alertContainer.innerHTML = '';
+
+            alertsToShow.forEach(function(alert) {
+                var alertElement = document.createElement('div');
+                alertElement.classList.add('alert');
+                alertElement.innerHTML = `
+                    <strong>ID:</strong> ${alert.pk}<br>
+                    <strong>Cryptocurrency:</strong> ${alert.fields.cryptocurrency}<br>
+                    <strong>Target Price:</strong> ${alert.fields.target_price}
+                `;
+                alertContainer.appendChild(alertElement);
+            });
+        }
+
+        // Function to generate pagination links
+        function generatePaginationLinks(totalPages, currentPage) {
+            var paginationContainer = document.getElementById('paginationContainer');
+            paginationContainer.innerHTML = '';
+            totalPages = 10
+            for (var i = 1; i <= totalPages; i++) {
+                var pageLink = document.createElement('li');
+                pageLink.classList.add('page-link');
+                if (i === currentPage) {
+                    pageLink.classList.add('active');
+                }
+                pageLink.textContent = i;
+                pageLink.setAttribute('data-page', i);
+                paginationContainer.appendChild(pageLink);
+
+                pageLink.addEventListener('click', function() {
+                    var pageNumber = parseInt(this.getAttribute('data-page'));
+                    //run();
+                    //displayPriceAlerts(pageNumber, 5); // Change page size as needed
+                    // You can also call an API to fetch data for the selected page
+                    //generatePaginationLinks(totalPages, pageNumber);
+                });
+            }
+        }
+
+        // Display initial page
+        //run()
+        //displayPriceAlerts(1, 5); // Change page size as needed
+
+        // Generate pagination links based on total number of price alerts and page size
+        //var totalPages = Math.ceil(priceAlerts.length / 5); // Change page size as needed
+        //generatePaginationLinks(totalPages, 1); // Display first page by default
+    </script>
+</body>
+</html>

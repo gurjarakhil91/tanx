@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  db:
+    image: postgres
+    restart: always
+    container_name: postgres_tanx
+    ports:
+      - '5432:5432'
+    COPY project_start.sql /docker-entrypoint-initdb.d/q
+    volumes: 
+      - db:/var/lib/postgresql/data
+  web:
+    build: .
+    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py crontab add && python manage.py runserver 0.0.0.0:8000"
+    container_name: tanx
+    volumes:
+      - .:/tanx
+    ports:
+      - "8000:8000"
